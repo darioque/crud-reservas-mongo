@@ -1,0 +1,7 @@
+services:
+  reservasdb:
+    image: mongo
+    container_name: reservasdb
+    restart: always
+    ports:
+      - 27017:27017
