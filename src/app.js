@@ -1,6 +1,7 @@
 import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import connectDB from './db.js';
 import userRoutes from './routes/user.routes.js';
 
@@ -17,11 +18,12 @@ app.use(
   })
 );
 app.use(morgan('dev'));
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Routes
-app.use('/api', userRoutes);
+app.use('/api/users', userRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {
