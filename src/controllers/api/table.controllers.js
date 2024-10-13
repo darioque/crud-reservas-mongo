@@ -62,7 +62,7 @@ export const deleteTable = async (req, res) => {
 			});
 		}
 
-		await table.remove();
+		await table.deleteOne();
         res.json({ message: "Table deleted successfully" });
 	} catch (error) {
         res.status(500).json({ message: error.message });

@@ -144,7 +144,7 @@ export const deleteReservation = async (req, res) => {
       $pull: { reservations: reservation._id },
     });
 
-    await reservation.remove();
+    await reservation.deleteOne();
     res.json({ message: "Reservation deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
