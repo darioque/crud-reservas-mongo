@@ -5,17 +5,9 @@ export const createTable = async (req, res) => {
 		const { table_number, capacity } = req.body;
 		const table = new Table({ table_number, capacity });
 		await table.save();
-		if (req.xhr || req.headers.accept.indexOf("json") > -1) {
-			res.status(201).json(table);
-		} else {
-			res.redirect("/tables");
-		}
+		res.status(201).json(table);
 	} catch (error) {
-		if (req.xhr || req.headers.accept.indexOf("json") > -1) {
-			res.status(500).json({ message: error.message });
-		} else {
-			res.status(500).render("error", { message: error.message });
-		}
+		res.status(500).json({ message: error.message });
 	}
 };
 
@@ -51,17 +43,9 @@ export const updateTable = async (req, res) => {
 		if (!table) {
 			return res.status(404).json({ message: "Table not found" });
 		}
-		if (req.xhr || req.headers.accept.indexOf("json") > -1) {
-			res.json(table);
-		} else {
-			res.redirect("/tables");
-		}
+		res.json(table);
 	} catch (error) {
-		if (req.xhr || req.headers.accept.indexOf("json") > -1) {
-			res.status(500).json({ message: error.message });
-		} else {
-			res.status(500).render("error", { message: error.message });
-		}
+        res.status(500).json({ message: error.message });
 	}
 };
 
@@ -73,25 +57,15 @@ export const deleteTable = async (req, res) => {
 		}
 
 		if (table.reservations.length > 0) {
-			return res
-				.status(400)
-				.json({
-					message: "Cannot delete table with existing reservations",
-				});
+			return res.status(400).json({
+				message: "Cannot delete table with existing reservations",
+			});
 		}
 
 		await table.remove();
-		if (req.xhr || req.headers.accept.indexOf("json") > -1) {
-			res.json({ message: "Table deleted successfully" });
-		} else {
-			res.redirect("/tables");
-		}
+        res.json({ message: "Table deleted successfully" });
 	} catch (error) {
-		if (req.xhr || req.headers.accept.indexOf("json") > -1) {
-			res.status(500).json({ message: error.message });
-		} else {
-			res.status(500).render("error", { message: error.message });
-		}
+        res.status(500).json({ message: error.message });
 	}
 };
 
@@ -114,21 +88,8 @@ export const getAvailableTables = async (req, res) => {
 				)
 		);
 
-		if (req.xhr || req.headers.accept.indexOf("json") > -1) {
-			res.json(filteredTables);
-		} else {
-			res.render("tables", {
-				tables: filteredTables,
-				date,
-				time,
-				party_size,
-			});
-		}
+        res.json(filteredTables);
 	} catch (error) {
-		if (req.xhr || req.headers.accept.indexOf("json") > -1) {
-			res.status(500).json({ message: error.message });
-		} else {
-			res.status(500).render("error", { message: error.message });
-		}
+        res.status(500).json({ message: error.message });
 	}
 };
