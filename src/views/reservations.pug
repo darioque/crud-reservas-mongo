@@ -1,0 +1,25 @@
+extends layout
+
+block content
+  h1.mb-4 My Reservations
+
+  if reservations && reservations.length > 0
+    .row
+      each reservation in reservations
+        .col-md-4.mb-3
+          .card
+            .card-body
+              h5.card-title Reservation for Table #{reservation.table.table_number}
+              p.card-text
+                | Date: #{new Date(reservation.date).toLocaleDateString()}
+                br
+                | Time: #{reservation.time}
+                br
+                | Party Size: #{reservation.party_size}
+              a.btn.btn-warning.me-2(href=`/reservations/edit/${reservation._id}`) Edit
+              form.d-inline(action=`/reservations/delete/${reservation._id}`, method="POST", onsubmit="return confirm('Are you sure you want to cancel this reservation?');")
+                button.btn.btn-danger(type="submit") Cancel
+  else
+    p You have no reservations.
+
+  a.btn.btn-primary.mt-3(href="/tables") Make a New Reservation

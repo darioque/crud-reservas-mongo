@@ -1,36 +1,60 @@
-import express from 'express';
-import morgan from 'morgan';
-import cors from 'cors';
-import cookieParser from 'cookie-parser';
-import connectDB from './db.js';
-import userRoutes from './routes/user.routes.js';
+import express from "express";
+import morgan from "morgan";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import path from "path";
+import { fileURLToPath } from "url";
+import connectDB from "./db.js";
+import userApiRoutes from "./routes/api/user.routes.js";
+import reservationApiRoutes from "./routes/api/reservation.routes.js";
+import tableApiRoutes from "./routes/api/table.routes.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Initialize app
 const app = express();
 
-// Conect to DB
+// Connect to DB
 connectDB();
 
 // Middlewares
 app.use(
-  cors({
-    origin: '*',
-  })
+	cors({
+		origin: "*",
+		credentials: true,
+	})
 );
-app.use(morgan('dev'));
+app.use(morgan("dev"));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Routes
-app.use('/api/users', userRoutes);
+// Set up Pug as the view engine
+app.set("view engine", "pug");
+app.set("views", path.join(__dirname, "views"));
+
+// API Routes
+app.use("/api/users", userApiRoutes);
+app.use("/api/reservations", reservationApiRoutes);
+app.use("/api/tables", tableApiRoutes);
+
+// View Routes
+app.get('/tables', (req, res) => res.render('tables', { title: 'Register' }));
+app.get('/register', (req, res) => res.render('register', { title: 'Register' }));
+app.get('/login', (req, res) => res.render('login', { title: 'Login' }));
+app.get('/reservations', (req, res) => res.render('reservations', { title: 'My Reservations' }));
 
 // Error handler
 app.use((err, req, res, next) => {
-  res.status(500).json({
-    status: 'error',
-    message: err.message,
-  });
+	console.error(err.stack);
+	res.status(500).render("error", {
+		title: "Error",
+		message:
+			process.env.NODE_ENV === "production"
+				? "Something went wrong!"
+				: err.message,
+	});
 });
 
 export default app;
