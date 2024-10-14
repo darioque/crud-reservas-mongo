@@ -1,4 +1,5 @@
 import Table from "../../models/Table.js";
+import Reservation from "../../models/Reservation.js";
 
 export const createTable = async (req, res) => {
 	try {
@@ -45,7 +46,7 @@ export const updateTable = async (req, res) => {
 		}
 		res.json(table);
 	} catch (error) {
-        res.status(500).json({ message: error.message });
+		res.status(500).json({ message: error.message });
 	}
 };
 
@@ -63,33 +64,62 @@ export const deleteTable = async (req, res) => {
 		}
 
 		await table.deleteOne();
-        res.json({ message: "Table deleted successfully" });
+		res.json({ message: "Table deleted successfully" });
 	} catch (error) {
-        res.status(500).json({ message: error.message });
+		res.status(500).json({ message: error.message });
 	}
 };
 
 export const getAvailableTables = async (req, res) => {
-	try {
-		const { date, time, party_size } = req.query;
-
-		const availableTables = await Table.find({
-			available: true,
-			capacity: { $gte: parseInt(party_size) },
-		}).populate("reservations");
-
-		const filteredTables = availableTables.filter(
-			(table) =>
-				!table.reservations.some(
-					(reservation) =>
-						reservation.date.toDateString() ===
-							new Date(date).toDateString() &&
-						reservation.time === time
-				)
-		);
-
-        res.json(filteredTables);
-	} catch (error) {
-        res.status(500).json({ message: error.message });
-	}
-};
+    try {
+      const { date, time, party_size } = req.query;
+  
+      if (!date || !time || !party_size) {
+        return res.status(400).json({ message: "Missing required query parameters" });
+      }
+  
+      console.log(`Searching for tables: date=${date}, time=${time}, party_size=${party_size}`);
+  
+      const requestDateTime = new Date(`${date}T${time}`);
+      const oneHourLater = new Date(requestDateTime.getTime() + 60 * 60 * 1000);
+      const oneHourBefore = new Date(requestDateTime.getTime() - 60 * 60 * 1000);
+  
+      console.log(`Request DateTime: ${requestDateTime}, One Hour Before: ${oneHourBefore}, One Hour Later: ${oneHourLater}`);
+  
+      const availableTables = await Table.find({
+        available: true,
+        capacity: { $gte: parseInt(party_size) },
+      });
+  
+      console.log(`Found ${availableTables.length} tables matching capacity`);
+  
+      const reservations = await Reservation.find({
+        date: {
+          $gte: new Date(date),
+          $lt: new Date(new Date(date).setDate(new Date(date).getDate() + 1))
+        },
+      }).populate('table_id');
+  
+      console.log(`Found ${reservations.length} reservations for the date`);
+  
+      const filteredTables = availableTables.filter(table => {
+        return !reservations.some(reservation => {
+          const reservationDateTime = new Date(`${reservation.date.toISOString().split('T')[0]}T${reservation.time}`);
+          console.log(`Checking reservation: Table ${reservation.table_id.table_number}, Time: ${reservationDateTime}`);
+          return (
+            reservation.table_id._id.toString() === table._id.toString() &&
+            reservationDateTime < oneHourLater &&
+            reservationDateTime > oneHourBefore
+          );
+        });
+      });
+  
+      console.log(`Filtered to ${filteredTables.length} available tables`);
+      filteredTables.forEach(table => console.log(`Available: Table ${table.table_number}`));
+  
+      res.json(filteredTables);
+    } catch (error) {
+      console.error('Error in getAvailableTables:', error);
+      res.status(500).json({ message: "An error occurred while fetching available tables", error: error.message });
+    }
+  };

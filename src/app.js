@@ -8,6 +8,7 @@ import connectDB from "./db.js";
 import userApiRoutes from "./routes/api/user.routes.js";
 import reservationApiRoutes from "./routes/api/reservation.routes.js";
 import tableApiRoutes from "./routes/api/table.routes.js";
+import viewRoutes from "./routes/view.routes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,10 +21,10 @@ connectDB();
 
 // Middlewares
 app.use(
-	cors({
-		origin: "*",
-		credentials: true,
-	})
+  cors({
+    origin: "*",
+    credentials: true,
+  })
 );
 app.use(morgan("dev"));
 app.use(cookieParser());
@@ -40,21 +41,18 @@ app.use("/api/reservations", reservationApiRoutes);
 app.use("/api/tables", tableApiRoutes);
 
 // View Routes
-app.get('/tables', (req, res) => res.render('tables', { title: 'Register' }));
-app.get('/register', (req, res) => res.render('register', { title: 'Register' }));
-app.get('/login', (req, res) => res.render('login', { title: 'Login' }));
-app.get('/reservations', (req, res) => res.render('reservations', { title: 'My Reservations' }));
+app.use("/", viewRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {
-	console.error(err.stack);
-	res.status(500).render("error", {
-		title: "Error",
-		message:
-			process.env.NODE_ENV === "production"
-				? "Something went wrong!"
-				: err.message,
-	});
+  console.error(err.stack);
+  res.status(500).render("error", {
+    title: "Error",
+    message:
+      process.env.NODE_ENV === "production"
+        ? "Something went wrong!"
+        : err.message,
+  });
 });
 
 export default app;
