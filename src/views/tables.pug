@@ -2,7 +2,8 @@ extends layout
 
 block content
   h1.mb-4 Available Tables
-  form.mb-4(action="/tables", method="GET")
+
+  form.mb-4#searchForm
     .row
       .col-md-3
         label.form-label(for="date") Date
@@ -16,14 +17,68 @@ block content
       .col-md-3
         button.btn.btn-primary.mt-4(type="submit") Search Tables
 
-  if tables && tables.length > 0
-    .row
-      each table in tables
-        .col-md-4.mb-3
-          .card
-            .card-body
-              h5.card-title Table #{table.table_number}
-              p.card-text Capacity: #{table.capacity}
-              a.btn.btn-success(href=`/reservations/create?table_id=${table._id}`) Reserve
-  else
-    p No available tables found for the selected criteria.
+  #tableResults
+    if tables && tables.length > 0
+      .row
+        each table in tables
+          .col-md-4.mb-3
+            .card
+              .card-body
+                h5.card-title Table #{table.table_number}
+                p.card-text Capacity: #{table.capacity}
+                button.btn.btn-success.reserve-btn(data-table-id=table._id) Reserve
+    else
+      p No available tables found. Please try different search criteria.
+
+  script.
+    document.getElementById('searchForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const date = document.getElementById('date').value;
+      const time = document.getElementById('time').value;
+      const party_size = document.getElementById('party_size').value;
+
+      fetch(`/api/tables/available?date=${date}&time=${time}&party_size=${party_size}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(tables => {
+          const resultsContainer = document.getElementById('tableResults');
+          if (tables.length > 0) {
+            resultsContainer.innerHTML = `
+              <h2>Available Tables for ${date} at ${time}</h2>
+              <div class="row">
+                ${tables.map(table => `
+                  <div class="col-md-4 mb-3">
+                    <div class="card">
+                      <div class="card-body">
+                        <h5 class="card-title">Table ${table.table_number}</h5>
+                        <p class="card-text">Capacity: ${table.capacity}</p>
+                        <button class="btn btn-success reserve-btn" data-table-id="${table._id}">Reserve</button>
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            `;
+          } else {
+            resultsContainer.innerHTML = '<p>No available tables found. Please try different search criteria.</p>';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          document.getElementById('tableResults').innerHTML = '<p>An error occurred while searching for tables. Please try again or contact support if the problem persists.</p>';
+        });
+    });
+
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.classList.contains('reserve-btn')) {
+        const tableId = e.target.getAttribute('data-table-id');
+        const date = document.getElementById('date').value;
+        const time = document.getElementById('time').value;
+        const party_size = document.getElementById('party_size').value;
+        window.location.href = `/reservations/create?table_id=${tableId}&date=${date}&time=${time}&party_size=${party_size}`;
+      }
+    });
