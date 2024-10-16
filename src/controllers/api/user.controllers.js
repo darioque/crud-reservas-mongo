@@ -61,12 +61,8 @@ export const loginUser = async (req, res) => {
     // Set cookie
     res.cookie('token', token);
 
-    // Send response
-    res.json({
-      id: userFound._id,
-      username: userFound.name,
-      email: userFound.email,
-    });
+    // Redirect to reservation
+    res.redirect('/reservations');
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -95,7 +91,7 @@ export const userProfile = async (req, res) => {
 export const logoutUser = async (req, res) => {
   try {
     res.cookie('token', '', { maxAge: 0 });
-    res.status(200).json({ message: 'Logged out successfully' });
+    res.redirect('/login');
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

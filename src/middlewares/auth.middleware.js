@@ -7,7 +7,9 @@ export const auth = (req, res, next) => {
 
     if (!token) {
       if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-        return res.status(401).json({ message: 'No token, authorization denied' });
+        return res
+          .status(401)
+          .json({ message: 'No token, authorization denied' });
       } else {
         return res.redirect('/login');
       }
@@ -22,6 +24,7 @@ export const auth = (req, res, next) => {
         }
       }
       req.user = user;
+      res.locals.user = user;
       next();
     });
   } catch (error) {
