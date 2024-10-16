@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const tableSchema = new mongoose.Schema({
-  table_number: { type: Number, required: true },
+  table_number: { type: Number, required: true, unique: true },
   capacity: { type: Number, required: true },
   available: { type: Boolean, default: true },
   reservations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Reservation' }],
@@ -9,4 +9,3 @@ const tableSchema = new mongoose.Schema({
 });
 
 export default mongoose.model('Table', tableSchema);
-
