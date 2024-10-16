@@ -9,3 +9,4 @@ const tableSchema = new mongoose.Schema({
 });
 
 export default mongoose.model('Table', tableSchema);
+

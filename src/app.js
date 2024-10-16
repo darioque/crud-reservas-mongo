@@ -26,6 +26,7 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(morgan("dev"));
 app.use(cookieParser());
 app.use(express.json());
@@ -42,6 +43,7 @@ app.use("/api/tables", tableApiRoutes);
 
 // View Routes
 app.use("/", viewRoutes);
+
 
 // Error handler
 app.use((err, req, res, next) => {
