@@ -9,6 +9,7 @@ import userApiRoutes from "./routes/api/user.routes.js";
 import reservationApiRoutes from "./routes/api/reservation.routes.js";
 import tableApiRoutes from "./routes/api/table.routes.js";
 import viewRoutes from "./routes/view.routes.js";
+import adminApiRoutes from './routes/api/admin.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,6 +41,8 @@ app.set("views", path.join(__dirname, "views"));
 app.use("/api/users", userApiRoutes);
 app.use("/api/reservations", reservationApiRoutes);
 app.use("/api/tables", tableApiRoutes);
+app.use('/api/admin', adminApiRoutes);
+
 
 // View Routes
 app.use("/", viewRoutes);

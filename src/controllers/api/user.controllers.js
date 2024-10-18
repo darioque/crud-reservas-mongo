@@ -56,6 +56,7 @@ export const loginUser = async (req, res) => {
 		const token = await createAccessToken({
 			_id: userFound._id,
 			role: userFound.role,
+            name: userFound.name
 		});
 
 		// Set cookie
@@ -65,6 +66,7 @@ export const loginUser = async (req, res) => {
 			id: userFound._id,
 			username: userFound.name,
 			email: userFound.email,
+            role: userFound.role
 		});
 	} catch (error) {
 		res.status(500).json({ message: error.message });

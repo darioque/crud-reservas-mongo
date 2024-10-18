@@ -7,6 +7,7 @@ import {
   renderReservations,
   renderCreateReservation,
   renderEditReservation,
+  renderDashboard
 } from "../controllers/view.controllers.js";
 import { auth } from "../middlewares/auth.middleware.js";
 
@@ -19,5 +20,6 @@ router.get('/login', renderLogin);
 router.get('/reservations', auth, renderReservations);
 router.get('/reservations/create', auth, renderCreateReservation);
 router.get('/reservations/edit/:id', auth, renderEditReservation);
+router.get('/dashboard', auth, renderDashboard)
 
 export default router;
