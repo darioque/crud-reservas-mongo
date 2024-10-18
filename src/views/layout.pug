@@ -16,6 +16,10 @@ html(lang="en")
             if user
               li.nav-item
                 a.nav-link(href="/reservations") My Reservations
+            if user && user.role === 'admin'
+                li.nav-item
+                    a.nav-link(href="/dashboard") Dashboard
+            if user
               li.nav-item
                 form(method="GET" action="/api/users/logout" style="display:inline")
                   button.btn.btn-primary(type="submit") Logout
