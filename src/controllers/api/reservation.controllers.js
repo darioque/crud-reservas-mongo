@@ -3,7 +3,7 @@ import Table from "../../models/Table.js";
 
 export const createReservation = async (req, res) => {
   try {
-    const { table_id, date, guests } = req.body;
+    const { table_id, date, time, guests } = req.body;
     const user_id = req.user._id;
 
     // Check if table is available and has enough capacity
@@ -29,7 +29,7 @@ export const createReservation = async (req, res) => {
     const reservation = new Reservation({
       user_id,
       table_id,
-      date,
+      date: new Date(date + " " + time),
       guests,
     });
 

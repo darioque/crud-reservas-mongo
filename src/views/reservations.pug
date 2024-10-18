@@ -15,7 +15,7 @@ block content
               p.card-text
                 | Date: #{new Date(reservation.date).toLocaleDateString()}
                 br
-                | Time: #{reservation.time}
+                | Time: #{reservation.date.toLocaleTimeString() }
                 br
                 | Guests: #{reservation.guests}
               a.btn.btn-warning.me-2(href=`/reservations/edit/${reservation._id}`) Edit

@@ -17,7 +17,7 @@ block content
     
     .mb-3
       label.form-label(for="time") Time
-      input#time.form-control(type="time" name="time" required value=reservation.time)
+      input#time.form-control(type="time" name="time" required value=reservation.date.getHours().toString().padStart(2, '0') + ':' + reservation.date.getMinutes().toString().padStart(2, '0'))
     
     .mb-3
       label.form-label(for="guests") Number of Guests
