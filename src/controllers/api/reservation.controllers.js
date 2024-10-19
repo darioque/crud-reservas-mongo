@@ -133,7 +133,7 @@ export const deleteReservation = async (req, res) => {
       return res.status(404).json({ message: "Reservation not found" });
     }
 
-    if (reservation.user_id.toString() !== req.user._id.toString()) {
+    if (reservation.user_id.toString() !== req.user._id.toString() && req.user.role !== "admin") {
       return res
         .status(403)
         .json({ message: "Not authorized to delete this reservation" });

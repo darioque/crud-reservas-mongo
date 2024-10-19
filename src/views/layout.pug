@@ -21,7 +21,7 @@ html(lang="en")
                     a.nav-link(href="/dashboard") Dashboard
             if user
               li.nav-item
-                form(method="GET" action="/api/users/logout" style="display:inline")
+                form(method="GET" action="/logout" style="display:inline")
                   button.btn.btn-primary(type="submit") Logout
             else
               li.nav-item

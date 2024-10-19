@@ -22,6 +22,15 @@ export const renderLogin = (req, res) => {
 	res.render("login", { title: "Login" });
 };
 
+export const logoutUser = async (req, res) => {
+	try {
+		res.cookie("token", "", { maxAge: 0 });
+		res.redirect("/login");
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+};
+
 export const renderDashboard = async (req, res) => {
     try {
       if (req.user.role !== "admin") {
