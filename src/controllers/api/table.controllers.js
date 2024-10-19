@@ -112,7 +112,7 @@ export const getAvailableTables = async (req, res) => {
 
     const availableTables = await Table.find({
       available: true,
-      capacity: { $gte: parseInt(party_size) },
+      capacity: { $gte: parseInt(party_size),  $lte: parseInt(party_size) + 3},
     });
 
     console.log(`Found ${availableTables.length} tables matching capacity`);
