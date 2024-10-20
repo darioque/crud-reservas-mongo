@@ -1,8 +1,15 @@
+// Import necessary models
 import Table from '../../models/Table.js';
 import Reservation from '../../models/Reservation.js';
 
+/**
+ * Create a new table
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 export const createTable = async (req, res) => {
   try {
+    // Check if the user is an admin
     if (req.user.role !== 'admin')
       return res.status(403).json({ message: 'Only admins can create tables' });
 
@@ -16,6 +23,7 @@ export const createTable = async (req, res) => {
       });
     }
 
+    // Create and save the new table
     const table = new Table({ table_number, capacity });
     await table.save();
     res.status(201).json(table);
@@ -24,6 +32,11 @@ export const createTable = async (req, res) => {
   }
 };
 
+/**
+ * Get all tables
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 export const getAllTables = async (req, res) => {
   try {
     const tables = await Table.find();
@@ -33,6 +46,11 @@ export const getAllTables = async (req, res) => {
   }
 };
 
+/**
+ * Get a specific table by ID
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 export const getTable = async (req, res) => {
   try {
     const table = await Table.findById(req.params.id);
@@ -45,10 +63,17 @@ export const getTable = async (req, res) => {
   }
 };
 
+/**
+ * Update an existing table
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 export const updateTable = async (req, res) => {
   try {
+    // Check if the user is an admin
     if (req.user.role !== 'admin')
       return res.status(403).json({ message: 'Only admins can update tables' });
+    
     const { table_number, capacity, available } = req.body;
     const table = await Table.findByIdAndUpdate(
       req.params.id,
@@ -64,8 +89,14 @@ export const updateTable = async (req, res) => {
   }
 };
 
+/**
+ * Delete a table
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 export const deleteTable = async (req, res) => {
   try {
+    // Check if the user is an admin
     if (req.user.role !== 'admin')
       return res.status(403).json({ message: 'Only admins can delete tables' });
 
@@ -75,6 +106,7 @@ export const deleteTable = async (req, res) => {
       return res.status(404).json({ message: 'Table not found' });
     }
 
+    // Check if the table has existing reservations
     if (table.reservations.length > 0) {
       return res.status(400).json({
         message: 'Cannot delete table with existing reservations',
@@ -88,10 +120,16 @@ export const deleteTable = async (req, res) => {
   }
 };
 
+/**
+ * Get available tables based on date, time, and party size
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 export const getAvailableTables = async (req, res) => {
   try {
     const { date, time, party_size } = req.query;
 
+    // Check for required query parameters
     if (!date || !time || !party_size) {
       return res
         .status(400)
@@ -102,6 +140,7 @@ export const getAvailableTables = async (req, res) => {
       `Searching for tables: date=${date}, time=${time}, party_size=${party_size}`
     );
 
+    // Calculate time range for reservation (1 hour before and after requested time)
     const requestDateTime = new Date(`${date}T${time}`);
     const oneHourLater = new Date(requestDateTime.getTime() + 60 * 60 * 1000);
     const oneHourBefore = new Date(requestDateTime.getTime() - 60 * 60 * 1000);
@@ -110,13 +149,15 @@ export const getAvailableTables = async (req, res) => {
       `Request DateTime: ${requestDateTime}, One Hour Before: ${oneHourBefore}, One Hour Later: ${oneHourLater}`
     );
 
+    // Find tables that match the capacity requirements
     const availableTables = await Table.find({
       available: true,
-      capacity: { $gte: parseInt(party_size),  $lte: parseInt(party_size) + 3},
+      capacity: { $gte: parseInt(party_size), $lte: parseInt(party_size) + 3},
     });
 
     console.log(`Found ${availableTables.length} tables matching capacity`);
 
+    // Find reservations for the given date
     const reservations = await Reservation.find({
       date: {
         $gte: new Date(date),
@@ -126,6 +167,7 @@ export const getAvailableTables = async (req, res) => {
 
     console.log(`Found ${reservations.length} reservations for the date`);
 
+    // Filter out tables that have conflicting reservations
     const filteredTables = availableTables.filter((table) => {
       return !reservations.some((reservation) => {
         const reservationDateTime = new Date(

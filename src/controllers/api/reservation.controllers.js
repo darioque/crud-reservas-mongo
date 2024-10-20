@@ -1,6 +1,12 @@
+// Import necessary models
 import Reservation from "../../models/Reservation.js";
 import Table from "../../models/Table.js";
 
+/**
+ * Create a new reservation
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 export const createReservation = async (req, res) => {
   try {
     const { table_id, date, time, guests } = req.body;
@@ -26,6 +32,7 @@ export const createReservation = async (req, res) => {
       });
     }
 
+    // Create and save the new reservation
     const reservation = new Reservation({
       user_id,
       table_id,
@@ -35,6 +42,7 @@ export const createReservation = async (req, res) => {
 
     await reservation.save();
 
+    // Update the table with the new reservation
     table.reservations.push(reservation._id);
     await table.save();
 
@@ -44,6 +52,11 @@ export const createReservation = async (req, res) => {
   }
 };
 
+/**
+ * Get all reservations
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 export const getAllReservations = async (req, res) => {
   try {
     const reservations = await Reservation.find()
@@ -55,6 +68,11 @@ export const getAllReservations = async (req, res) => {
   }
 };
 
+/**
+ * Get reservations for the current user
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 export const getUserReservations = async (req, res) => {
   try {
     const reservations = await Reservation.find({
@@ -66,6 +84,11 @@ export const getUserReservations = async (req, res) => {
   }
 };
 
+/**
+ * Get a specific reservation by ID
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 export const getReservation = async (req, res) => {
   try {
     const reservation = await Reservation.findById(req.params.id)
@@ -80,6 +103,11 @@ export const getReservation = async (req, res) => {
   }
 };
 
+/**
+ * Update an existing reservation
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 export const updateReservation = async (req, res) => {
   try {
     const { table_id, date, guests } = req.body;
@@ -89,6 +117,7 @@ export const updateReservation = async (req, res) => {
       return res.status(404).json({ message: "Reservation not found" });
     }
 
+    // Check if the user is authorized to update this reservation
     if (reservation.user_id.toString() !== req.user._id.toString()) {
       return res
         .status(403)
@@ -114,6 +143,7 @@ export const updateReservation = async (req, res) => {
       await newTable.save();
     }
 
+    // Update reservation details
     reservation.table_id = table_id || reservation.table_id;
     reservation.date = date || reservation.date;
     reservation.guests = guests || reservation.guests;
@@ -125,6 +155,11 @@ export const updateReservation = async (req, res) => {
   }
 };
 
+/**
+ * Delete a reservation
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 export const deleteReservation = async (req, res) => {
   try {
     const reservation = await Reservation.findById(req.params.id);
@@ -133,6 +168,7 @@ export const deleteReservation = async (req, res) => {
       return res.status(404).json({ message: "Reservation not found" });
     }
 
+    // Check if the user is authorized to delete this reservation
     if (reservation.user_id.toString() !== req.user._id.toString() && req.user.role !== "admin") {
       return res
         .status(403)
