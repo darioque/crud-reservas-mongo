@@ -1,12 +1,20 @@
+// Import necessary models
 import Reservation from "../../models/Reservation.js";
 import Table from "../../models/Table.js";
 
+/**
+ * Get admin dashboard data
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 export const getAdminDashboard = async (req, res) => {
   try {
+    // Check if the user has admin privileges
     if (req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Access denied' });
     }
 
+    // Fetch dashboard statistics
     const totalTables = await Table.countDocuments();
     const totalReservations = await Reservation.countDocuments();
     const availableTables = await Table.countDocuments({ available: true });
@@ -24,6 +32,7 @@ export const getAdminDashboard = async (req, res) => {
       }
     });
 
+    // Send dashboard data as JSON response
     res.json({
       totalTables,
       totalReservations,
@@ -35,8 +44,14 @@ export const getAdminDashboard = async (req, res) => {
   }
 };
 
+/**
+ * Get occupancy report for a date range
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 export const getOccupancyReport = async (req, res) => {
   try {
+    // Check if the user has admin privileges
     if (req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Access denied' });
     }
@@ -45,6 +60,7 @@ export const getOccupancyReport = async (req, res) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
 
+    // Fetch reservations for the given date range
     const reservations = await Reservation.find({
       date: {
         $gte: start,
@@ -80,14 +96,21 @@ export const getOccupancyReport = async (req, res) => {
   }
 };
 
+/**
+ * Bulk update table availability
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 export const bulkUpdateTableAvailability = async (req, res) => {
   try {
+    // Check if the user has admin privileges
     if (req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Access denied' });
     }
 
     const { tableIds, available } = req.body;
 
+    // Update multiple tables' availability status
     const result = await Table.updateMany(
       { _id: { $in: tableIds } },
       { $set: { available } }
@@ -102,13 +125,21 @@ export const bulkUpdateTableAvailability = async (req, res) => {
   }
 };
 
+/**
+ * Get reservations for a specific date range
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 export const getReservationsByDateRange = async (req, res) => {
   try {
+    // Check if the user has admin privileges
     if (req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Access denied' });
     }
 
     const { startDate, endDate } = req.query;
+
+    // Fetch reservations within the specified date range
     const reservations = await Reservation.find({
       date: {
         $gte: new Date(startDate),
