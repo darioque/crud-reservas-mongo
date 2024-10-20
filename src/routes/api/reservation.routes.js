@@ -10,7 +10,7 @@ import {
 import { auth } from '../../middlewares/auth.middleware.js';
 
 const router = Router();
-
+// /api/reservations+
 router.post('/', auth, createReservation);
 router.get('/', auth, getAllReservations);
 router.get('/my', auth, getUserReservations);

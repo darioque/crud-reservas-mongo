@@ -4,7 +4,7 @@ import { createAccessToken } from "../../libs/jwt.js";
 
 export const createUser = async (req, res) => {
 	try {
-		const { name, email, password, role } = req.body;
+		const { name, email, password, role = 'client' } = req.body;
 		const userfound = await User.findOne({ email });
 
 		if (userfound)
@@ -29,11 +29,13 @@ export const createUser = async (req, res) => {
 		res.cookie("token", token);
 
 		// Send response
-		res.json({
+		res.status(201).json({
 			id: savedUser._id,
 			username: savedUser.name,
 			email: savedUser.email,
+            role: savedUser.role
 		});
+
 	} catch (error) {
 		res.status(500).json({ message: error.message });
 	}

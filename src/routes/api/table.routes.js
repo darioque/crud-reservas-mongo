@@ -11,9 +11,10 @@ import { auth } from '../../middlewares/auth.middleware.js';
 
 const router = Router();
 
+// /api/tables+
 router.post('/', auth, createTable);
-router.get('/available', getAvailableTables);
 router.get('/', getAllTables);
+router.get('/available', getAvailableTables);
 router.get('/:id', getTable);
 router.put('/:id', auth, updateTable);
 router.delete('/:id', auth, deleteTable);
