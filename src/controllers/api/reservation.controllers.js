@@ -17,7 +17,7 @@ export const createReservation = async (req, res) => {
     // Check if table is already reserved for the given date
     const existingReservation = await Reservation.findOne({
       table_id,
-      date: new Date(date),
+      date: new Date(date + " " + time),
     });
 
     if (existingReservation) {

@@ -8,7 +8,7 @@ import {
 import { auth } from '../../middlewares/auth.middleware.js';
 
 const router = Router();
-
+// api/users/+
 router.post('/register', createUser);
 router.post('/login', loginUser);
 router.get('/profile', auth, userProfile);
