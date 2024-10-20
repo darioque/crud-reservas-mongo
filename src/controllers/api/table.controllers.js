@@ -73,7 +73,7 @@ export const updateTable = async (req, res) => {
     // Check if the user is an admin
     if (req.user.role !== 'admin')
       return res.status(403).json({ message: 'Only admins can update tables' });
-    
+
     const { table_number, capacity, available } = req.body;
     const table = await Table.findByIdAndUpdate(
       req.params.id,
@@ -152,7 +152,7 @@ export const getAvailableTables = async (req, res) => {
     // Find tables that match the capacity requirements
     const availableTables = await Table.find({
       available: true,
-      capacity: { $gte: parseInt(party_size), $lte: parseInt(party_size) + 3},
+      capacity: { $gte: parseInt(party_size), $lte: parseInt(party_size) + 3 },
     });
 
     console.log(`Found ${availableTables.length} tables matching capacity`);

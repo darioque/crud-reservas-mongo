@@ -1,6 +1,6 @@
 // Import necessary models
-import Reservation from "../../models/Reservation.js";
-import Table from "../../models/Table.js";
+import Reservation from '../../models/Reservation.js';
+import Table from '../../models/Table.js';
 
 /**
  * Create a new reservation
@@ -10,25 +10,26 @@ import Table from "../../models/Table.js";
 export const createReservation = async (req, res) => {
   try {
     const { table_id, date, time, guests } = req.body;
+    console.log(date, time);
     const user_id = req.user._id;
 
     // Check if table is available and has enough capacity
     const table = await Table.findById(table_id);
     if (!table || !table.available || table.capacity < guests) {
       return res.status(400).json({
-        message: "Table not available or insufficient capacity",
+        message: 'Table not available or insufficient capacity',
       });
     }
 
     // Check if table is already reserved for the given date
     const existingReservation = await Reservation.findOne({
       table_id,
-      date: new Date(date + " " + time),
+      date: new Date(date + ' ' + time),
     });
 
     if (existingReservation) {
       return res.status(400).json({
-        message: "Table is already reserved for this date",
+        message: 'Table is already reserved for this date',
       });
     }
 
@@ -36,7 +37,7 @@ export const createReservation = async (req, res) => {
     const reservation = new Reservation({
       user_id,
       table_id,
-      date: new Date(date + " " + time),
+      date: new Date(date + ' ' + time),
       guests,
     });
 
@@ -60,8 +61,8 @@ export const createReservation = async (req, res) => {
 export const getAllReservations = async (req, res) => {
   try {
     const reservations = await Reservation.find()
-      .populate("user_id", "name email")
-      .populate("table_id", "table_number capacity");
+      .populate('user_id', 'name email')
+      .populate('table_id', 'table_number capacity');
     res.json(reservations);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -77,7 +78,7 @@ export const getUserReservations = async (req, res) => {
   try {
     const reservations = await Reservation.find({
       user_id: req.user._id,
-    }).populate("table_id", "table_number capacity");
+    }).populate('table_id', 'table_number capacity');
     res.json(reservations);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -92,10 +93,10 @@ export const getUserReservations = async (req, res) => {
 export const getReservation = async (req, res) => {
   try {
     const reservation = await Reservation.findById(req.params.id)
-      .populate("user_id", "name email")
-      .populate("table_id", "table_number capacity");
+      .populate('user_id', 'name email')
+      .populate('table_id', 'table_number capacity');
     if (!reservation) {
-      return res.status(404).json({ message: "Reservation not found" });
+      return res.status(404).json({ message: 'Reservation not found' });
     }
     res.json(reservation);
   } catch (error) {
@@ -114,14 +115,14 @@ export const updateReservation = async (req, res) => {
     const reservation = await Reservation.findById(req.params.id);
 
     if (!reservation) {
-      return res.status(404).json({ message: "Reservation not found" });
+      return res.status(404).json({ message: 'Reservation not found' });
     }
 
     // Check if the user is authorized to update this reservation
     if (reservation.user_id.toString() !== req.user._id.toString()) {
       return res
         .status(403)
-        .json({ message: "Not authorized to update this reservation" });
+        .json({ message: 'Not authorized to update this reservation' });
     }
 
     // Check if new table is available if changed
@@ -130,7 +131,9 @@ export const updateReservation = async (req, res) => {
       if (!newTable || !newTable.available || newTable.capacity < guests) {
         return res
           .status(400)
-          .json({ message: "New table not available or insufficient capacity" });
+          .json({
+            message: 'New table not available or insufficient capacity',
+          });
       }
 
       // Remove reservation from old table
@@ -165,14 +168,17 @@ export const deleteReservation = async (req, res) => {
     const reservation = await Reservation.findById(req.params.id);
 
     if (!reservation) {
-      return res.status(404).json({ message: "Reservation not found" });
+      return res.status(404).json({ message: 'Reservation not found' });
     }
 
     // Check if the user is authorized to delete this reservation
-    if (reservation.user_id.toString() !== req.user._id.toString() && req.user.role !== "admin") {
+    if (
+      reservation.user_id.toString() !== req.user._id.toString() &&
+      req.user.role !== 'admin'
+    ) {
       return res
         .status(403)
-        .json({ message: "Not authorized to delete this reservation" });
+        .json({ message: 'Not authorized to delete this reservation' });
     }
 
     // Remove reservation from table
@@ -181,7 +187,7 @@ export const deleteReservation = async (req, res) => {
     });
 
     await reservation.deleteOne();
-    res.json({ message: "Reservation deleted successfully" });
+    res.json({ message: 'Reservation deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
