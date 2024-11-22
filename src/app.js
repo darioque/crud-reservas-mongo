@@ -10,6 +10,8 @@ import reservationApiRoutes from "./routes/api/reservation.routes.js";
 import tableApiRoutes from "./routes/api/table.routes.js";
 import viewRoutes from "./routes/view.routes.js";
 import adminApiRoutes from './routes/api/admin.routes.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
