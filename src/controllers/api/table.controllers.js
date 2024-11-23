@@ -114,7 +114,7 @@ export const deleteTable = async (req, res) => {
     }
 
     await table.deleteOne();
-    res.json({ message: 'Table deleted successfully' });
+    res.status(204).json({ message: 'Table deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -1,4 +1,3 @@
-// Import necessary models
 import Reservation from "../../models/Reservation.js";
 import Table from "../../models/Table.js";
 
