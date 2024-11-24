@@ -39,8 +39,10 @@ export const createUser = async (req, res) => {
             id: savedUser._id,
             username: savedUser.name,
             email: savedUser.email,
-            role: savedUser.role
+            role: savedUser.role,
+            redirectTo: "/reservations"
         });
+        
 
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -74,19 +76,35 @@ export const loginUser = async (req, res) => {
         });
 
         // Set cookie with token
-        res.cookie("token", token);
-
-        // Send response with user details (excluding password)
-        return res.json({
-            id: userFound._id,
-            username: userFound.name,
-            email: userFound.email,
-            role: userFound.role
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 24 * 60 * 60 * 1000, 
         });
+
+        // Validar y asignar redirección según el rol del usuario
+        let redirectTo;
+        if (userFound.role === "admin") {
+            redirectTo = "/dashboard";
+        } else if (userFound.role === "client") {
+            redirectTo = "/reservations";
+        } else {
+            redirectTo = "/"; // Ruta por defecto si el rol es desconocido
+        }
+
+        // Asegúrate de incluir `redirectTo` en la respuesta JSON
+        return res.status(200).json({
+            message: "Login successful",
+            role: userFound.role || "unknown",
+            redirectTo: redirectTo,  // Esta línea es la clave
+        });
+
     } catch (error) {
+        console.error("Error in loginUser:", error);
         res.status(500).json({ message: error.message });
     }
 };
+
 
 /**
  * Get user profile
