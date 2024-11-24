@@ -1,6 +1,8 @@
 // Import necessary models
 import Reservation from '../../models/Reservation.js';
 import Table from '../../models/Table.js';
+import { sendReservationEmail } from '../../services/emailServices.js';
+import User from '../../models/User.js'; 
 
 /**
  * Create a new reservation
@@ -12,6 +14,12 @@ export const createReservation = async (req, res) => {
     const { table_id, date, time, guests } = req.body;
     console.log(date, time);
     const user_id = req.user._id;
+    
+    // Busca los datos completos del usuario (usando userData en lugar de user)
+    const userData = await User.findById(user_id);
+    if (!userData) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
 
     // Check if table is available and has enough capacity
     const table = await Table.findById(table_id);
@@ -47,7 +55,17 @@ export const createReservation = async (req, res) => {
     table.reservations.push(reservation._id);
     await table.save();
 
-    res.status(201).json(reservation);
+    // Populate table details for the email
+    const populatedReservation = await reservation.populate('table_id');
+
+    // Send confirmation email
+    await sendReservationEmail(userData, populatedReservation);
+
+
+    res.status(201).json({
+      message: 'Confirmación enviada por email',
+      reservation,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

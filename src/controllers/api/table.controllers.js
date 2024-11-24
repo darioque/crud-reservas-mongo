@@ -140,14 +140,11 @@ export const getAvailableTables = async (req, res) => {
       `Searching for tables: date=${date}, time=${time}, party_size=${party_size}`
     );
 
-    // Calculate time range for reservation (1 hour before and after requested time)
+    // Combine date and time into a Date object
     const requestDateTime = new Date(`${date}T${time}`);
-    const oneHourLater = new Date(requestDateTime.getTime() + 60 * 60 * 1000);
-    const oneHourBefore = new Date(requestDateTime.getTime() - 60 * 60 * 1000);
+    const oneDayLater = new Date(new Date(requestDateTime).setDate(requestDateTime.getDate() + 1));
 
-    console.log(
-      `Request DateTime: ${requestDateTime}, One Hour Before: ${oneHourBefore}, One Hour Later: ${oneHourLater}`
-    );
+    console.log(`Request DateTime: ${requestDateTime}`);
 
     // Find tables that match the capacity requirements
     const availableTables = await Table.find({
@@ -161,26 +158,26 @@ export const getAvailableTables = async (req, res) => {
     const reservations = await Reservation.find({
       date: {
         $gte: new Date(date),
-        $lt: new Date(new Date(date).setDate(new Date(date).getDate() + 1)),
+        $lt: oneDayLater,
       },
     }).populate('table_id');
 
     console.log(`Found ${reservations.length} reservations for the date`);
 
-    // Filter out tables that have conflicting reservations
+    // Filter out tables that have conflicting reservations on the requested date and time
     const filteredTables = availableTables.filter((table) => {
       return !reservations.some((reservation) => {
-        const reservationDateTime = new Date(
-          `${reservation.date.toISOString().split('T')[0]}T${reservation.time}`
-        );
-        console.log(
-          `Checking reservation: Table ${reservation.table_id.table_number}, Time: ${reservationDateTime}`
-        );
-        return (
-          reservation.table_id._id.toString() === table._id.toString() &&
-          reservationDateTime < oneHourLater &&
-          reservationDateTime > oneHourBefore
-        );
+        // Compare if the table_id in the reservation matches the table being checked
+        if (reservation.table_id._id.toString() === table._id.toString()) {
+          // Check if the reservation time matches the requested time
+          const reservationDateTime = new Date(reservation.date); 
+          
+          console.log(
+            `Checking reservation: Table ${reservation.table_id.table_number}, Time: ${reservationDateTime}`
+          );
+          return reservationDateTime.getTime() === requestDateTime.getTime(); // Exact match on date and time
+        }
+        return false;
       });
     });
 
