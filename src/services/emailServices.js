@@ -23,14 +23,14 @@ export const sendReservationEmail = async (user, reservation) => {
     });
   
     const formattedDate = dayjs(reservation.date).format('MMMM D, YYYY h:mm A');
-      
+
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: user.email,
       subject: 'Confirmación de reserva',
       html: `
         <h3>Hola ${user.name},</h3>
-        <p>¡Gracias por elegir nuestro restaurante! Tu reserva ha sido confirmada.</p>
+        <p>¡Gracias por elegir nuestro restaurante! Su reserva ha sido confirmada.</p>
         <p><strong>Detalles de la Reserva:</strong></p>
         <ul>
           <li><strong>Número de mesa:</strong> ${reservation.table_id.table_number}</li>
