@@ -1,174 +1,209 @@
 import {
-	createReservation,
-	getAllReservations,
-	getUserReservations,
-	getReservation,
-	updateReservation,
-	deleteReservation,
-} from "../controllers/api/reservation.controllers.js";
-import Reservation from "../models/Reservation.js";
-import Table from "../models/Table.js";
-import User from "../models/User.js";
-import mongoose from "mongoose";
-import { jest } from "@jest/globals";
+  createReservation,
+  getAllReservations,
+  getUserReservations,
+  getReservation,
+  updateReservation,
+  deleteReservation,
+} from '../controllers/api/reservation.controllers.js';
+import Reservation from '../models/Reservation.js';
+import Table from '../models/Table.js';
+import User from '../models/User.js';
+import mongoose from 'mongoose';
+import { jest } from '@jest/globals';
 
 // Mock request and response
 const mockResponse = () => {
-	const res = {};
-	res.status = jest.fn().mockReturnValue(res);
-	res.json = jest.fn().mockReturnValue(res);
-	return res;
+  const res = {};
+  res.status = jest.fn().mockReturnValue(res);
+  res.json = jest.fn().mockReturnValue(res);
+  return res;
 };
 
-describe("Reservation Controller Tests", () => {
-	let mockReq;
-	let mockRes;
-	let testTable;
-	let testUser;
+describe('Reservation Controller Tests', () => {
+  let mockReq;
+  let mockRes;
+  let testTable;
+  let testUser;
 
-	beforeEach(async () => {
-		mockRes = mockResponse();
-		testUser = { _id: new mongoose.Types.ObjectId(), role: "client" };
+  const mockResponse = () => {
+    const res = {};
+    res.status = jest.fn().mockReturnValue(res);
+    res.json = jest.fn().mockReturnValue(res);
+    return res;
+  };
 
-		// Create a test table
-		testTable = await Table.create({
-			table_number: 1,
-			capacity: 4,
-			available: true,
-		});
-	});
+  beforeEach(async () => {
+    // Limpia las colecciones para evitar datos residuales
+    await User.deleteMany({});
+    await Table.deleteMany({});
+    await Reservation.deleteMany({});
 
-	describe("createReservation", () => {
-		beforeEach(() => {
-			mockReq = {
-				user: testUser,
-				body: {
-					table_id: testTable._id,
-					date: "2024-12-25",
-					time: "18:00",
-					guests: 2,
-				},
-			};
-		});
+    // Crea un usuario de prueba
+    testUser = await User.create({
+      name: 'Test User',
+      email: 'test@example.com',
+      password: 'password123',
+      role: 'client',
+    });
 
-		it("should create a new reservation successfully", async () => {
-			await createReservation(mockReq, mockRes);
+    // Crea una mesa de prueba
+    testTable = await Table.create({
+      table_number: 1,
+      capacity: 4,
+      available: true,
+      reservations: [],
+    });
 
-			expect(mockRes.status).toHaveBeenCalledWith(201);
-			expect(mockRes.json).toHaveBeenCalled();
+    // Configura el mock de la solicitud y respuesta
+    mockReq = {
+      user: { _id: testUser._id },
+      body: {
+        table_id: testTable._id.toString(),
+        date: '2024-12-25',
+        time: '18:00',
+        guests: 2,
+      },
+    };
+    mockRes = mockResponse();
+  });
 
-			const reservation = await Reservation.findOne({
-				user_id: testUser._id,
-			});
-			expect(reservation).toBeTruthy();
-			expect(reservation.guests).toBe(2);
-		});
+  afterEach(async () => {
+    // Limpia las colecciones
+    await User.deleteMany({});
+    await Table.deleteMany({});
+    await Reservation.deleteMany({});
+  });
 
-		it("should fail if table capacity is insufficient", async () => {
-			mockReq.body.guests = 10;
+  describe('createReservation', () => {
+    beforeEach(() => {
+      mockReq = {
+        user: testUser,
+        body: {
+          table_id: testTable._id,
+          date: '2024-12-25',
+          time: '18:00',
+          guests: 2,
+        },
+      };
+    });
 
-			await createReservation(mockReq, mockRes);
+    it('should create a new reservation successfully', async () => {
+      await createReservation(mockReq, mockRes);
 
-			expect(mockRes.status).toHaveBeenCalledWith(400);
-			expect(mockRes.json).toHaveBeenCalledWith({
-				message: "Table not available or insufficient capacity",
-			});
-		});
-	});
+      expect(mockRes.status).toHaveBeenCalledWith(201);
+      expect(mockRes.json).toHaveBeenCalled();
 
-	describe("getAllReservations", () => {
-		it("should return all reservations", async () => {
-			// Create test reservations
-			await Reservation.create([
-				{
-					user_id: testUser._id,
-					table_id: testTable._id,
-					date: new Date("2024-12-25 18:00"),
-					guests: 2,
-				},
-				{
-					user_id: testUser._id,
-					table_id: testTable._id,
-					date: new Date("2024-12-26 19:00"),
-					guests: 3,
-				},
-			]);
+      const reservation = await Reservation.findOne({
+        user_id: testUser._id,
+      });
+      expect(reservation).toBeTruthy();
+      expect(reservation.guests).toBe(2);
+    });
 
-			await getAllReservations(mockReq, mockRes);
+    it('should fail if table capacity is insufficient', async () => {
+      mockReq.body.guests = 10;
 
-			expect(mockRes.json).toHaveBeenCalled();
-			const reservations = mockRes.json.mock.calls[0][0];
-			expect(reservations).toHaveLength(2);
-		});
-	});
+      await createReservation(mockReq, mockRes);
 
-	describe("getUserReservations", () => {
-		beforeEach(() => {
-			mockReq = { user: testUser };
-		});
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        message: 'Table not available or insufficient capacity',
+      });
+    });
+  });
 
-		it("should return user specific reservations", async () => {
-			// Create test reservations for the user
-			await Reservation.create({
-				user_id: testUser._id,
-				table_id: testTable._id,
-				date: new Date("2024-12-25 18:00"),
-				guests: 2,
-			});
+  describe('getAllReservations', () => {
+    it('should return all reservations', async () => {
+      // Create test reservations
+      await Reservation.create([
+        {
+          user_id: testUser._id,
+          table_id: testTable._id,
+          date: new Date('2024-12-25 18:00'),
+          guests: 2,
+        },
+        {
+          user_id: testUser._id,
+          table_id: testTable._id,
+          date: new Date('2024-12-26 19:00'),
+          guests: 3,
+        },
+      ]);
 
-			await getUserReservations(mockReq, mockRes);
+      await getAllReservations(mockReq, mockRes);
 
-			expect(mockRes.json).toHaveBeenCalled();
-			const reservations = mockRes.json.mock.calls[0][0];
-			expect(reservations).toHaveLength(1);
-			expect(reservations[0].user_id.toString()).toBe(
-				testUser._id.toString()
-			);
-		});
-	});
+      expect(mockRes.json).toHaveBeenCalled();
+      const reservations = mockRes.json.mock.calls[0][0];
+      expect(reservations).toHaveLength(2);
+    });
+  });
 
-	describe("deleteReservation", () => {
-		let testReservation;
+  describe('getUserReservations', () => {
+    beforeEach(() => {
+      mockReq = { user: testUser };
+    });
 
-		beforeEach(async () => {
-			testReservation = await Reservation.create({
-				user_id: testUser._id,
-				table_id: testTable._id,
-				date: new Date("2024-12-25 18:00"),
-				guests: 2,
-			});
+    it('should return user specific reservations', async () => {
+      // Create test reservations for the user
+      await Reservation.create({
+        user_id: testUser._id,
+        table_id: testTable._id,
+        date: new Date('2024-12-25 18:00'),
+        guests: 2,
+      });
 
-			mockReq = {
-				user: testUser,
-				params: { id: testReservation._id },
-			};
-		});
+      await getUserReservations(mockReq, mockRes);
 
-		it("should delete reservation successfully", async () => {
-			await deleteReservation(mockReq, mockRes);
+      expect(mockRes.json).toHaveBeenCalled();
+      const reservations = mockRes.json.mock.calls[0][0];
+      expect(reservations).toHaveLength(1);
+      expect(reservations[0].user_id.toString()).toBe(testUser._id.toString());
+    });
+  });
 
-			expect(mockRes.json).toHaveBeenCalledWith({
-				message: "Reservation deleted successfully",
-			});
+  describe('deleteReservation', () => {
+    let testReservation;
 
-			const deletedReservation = await Reservation.findById(
-				testReservation._id
-			);
-			expect(deletedReservation).toBeNull();
-		});
+    beforeEach(async () => {
+      testReservation = await Reservation.create({
+        user_id: testUser._id,
+        table_id: testTable._id,
+        date: new Date('2024-12-25 18:00'),
+        guests: 2,
+      });
 
-		it("should not allow unauthorized deletion", async () => {
-			mockReq.user = {
-				_id: new mongoose.Types.ObjectId(),
-				role: "client",
-			};
+      mockReq = {
+        user: testUser,
+        params: { id: testReservation._id },
+      };
+    });
 
-			await deleteReservation(mockReq, mockRes);
+    it('should delete reservation successfully', async () => {
+      await deleteReservation(mockReq, mockRes);
 
-			expect(mockRes.status).toHaveBeenCalledWith(403);
-			expect(mockRes.json).toHaveBeenCalledWith({
-				message: "Not authorized to delete this reservation",
-			});
-		});
-	});
+      expect(mockRes.json).toHaveBeenCalledWith({
+        message: 'Reservation deleted successfully',
+      });
+
+      const deletedReservation = await Reservation.findById(
+        testReservation._id
+      );
+      expect(deletedReservation).toBeNull();
+    });
+
+    it('should not allow unauthorized deletion', async () => {
+      mockReq.user = {
+        _id: new mongoose.Types.ObjectId(),
+        role: 'client',
+      };
+
+      await deleteReservation(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(403);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        message: 'Not authorized to delete this reservation',
+      });
+    });
+  });
 });

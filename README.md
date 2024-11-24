@@ -19,9 +19,11 @@ Asegúrate de tener instalado lo siguiente en tu sistema:
 
 - [Node.js](https://nodejs.org/)
 - [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+- [Nodemailer](https://www.nodemailer.com/) : Create una cuenta para enviar emails.
 - Un administrador de paquetes como npm o yarn
 
-### Dependencias del proyecto
+### Dependencias importantes del proyecto
+
 El proyecto utiliza las siguientes bibliotecas y herramientas principales:
 
 - Express: Framework para construir APIs y aplicaciones web.
@@ -35,26 +37,31 @@ El proyecto utiliza las siguientes bibliotecas y herramientas principales:
 1. Clona el repositorio:
 
 ```bash
-git clone https://github.com/usuario/proyecto.git
+git clone https://github.com/tiago-appdev/crud-reservas-mongo.git
 ```
+
 2. Ingresa a la carpeta del proyecto:
 
 ```bash
-cd proyecto
+cd crud-reservas-mongo
 ```
+
 3. Instala las dependencias:
 
 ```bash
 npm install
 ```
+
 4. Crea un archivo .env con las siguientes variables:
 
 ```bash
 PORT=3000
-DB_NAME=reservasdb
+EMAIL_USER=test@gmail.com
+EMAIL_PASS=test test test test
 JWT_SECRET=secreto_para_token
-MONGODB_URI=mongodb+srv://usuario:contraseña@cluster.mongodb.net/reservasdb
+MONGODB_URI=mongodb+srv://usuario:contraseña@cluster.mongodb.net/nombreDeLaBD?retryWrites=true
 ```
+
 5. Inicia el servidor:
 
 ```bash
@@ -62,14 +69,17 @@ npm start
 ```
 
 ## Uso
-Puedes probar el sistema haciendo peticiones a la API con herramientas como Postman o Thunder Client.
+
+Puedes probar el sistema haciendo peticiones a la API con herramientas como [Postman](https://www.postman.com/downloads/) o [Thunder Client](https://www.thunderclient.com/).
 
 ### Tecnologías
+
 - Node.js - Entorno de ejecución de JavaScript.
 - Express - Framework de Node.js.
-- MongoDB - Base de datos NoSQL.
+- MongoDB Atlas - Servicio de alojamiento de MongoDB.
 - Mongoose - ODM para MongoDB.
 - JWT - JSON Web Tokens para autenticación.
+- Nodemailer - Herramienta para enviar emails.
 
 ## API
 
@@ -127,17 +137,23 @@ Puedes probar el sistema haciendo peticiones a la API con herramientas como Post
 
 1. Haz un fork de este repositorio.
 2. Crea una nueva rama para tus cambios:
+
 ```bash
 git checkout -b nueva-funcionalidad
 ```
+
 3. Realiza un commit con tus cambios:
+
 ```bash
 git commit -m "Descripción de los cambios"
 ```
+
 4. Sube la rama
+
 ```bash
 git push origin nueva-funcionalidad
 ```
+
 5. Abre un pull request
 
 ## Licencia
