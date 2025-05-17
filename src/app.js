@@ -9,8 +9,8 @@ import userApiRoutes from "./routes/api/user.routes.js";
 import reservationApiRoutes from "./routes/api/reservation.routes.js";
 import tableApiRoutes from "./routes/api/table.routes.js";
 import viewRoutes from "./routes/view.routes.js";
-import adminApiRoutes from './routes/api/admin.routes.js';
-import dotenv from 'dotenv';
+import adminApiRoutes from "./routes/api/admin.routes.js";
+import dotenv from "dotenv";
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -24,10 +24,10 @@ connectDB();
 
 // Middlewares
 app.use(
-  cors({
-    origin: 'http://localhost:3000',
-    credentials: true,
-  })
+	cors({
+		origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+		credentials: true,
+	})
 );
 
 app.use(morgan("dev"));
@@ -43,23 +43,21 @@ app.set("views", path.join(__dirname, "views"));
 app.use("/api/users", userApiRoutes);
 app.use("/api/reservations", reservationApiRoutes);
 app.use("/api/tables", tableApiRoutes);
-app.use('/api/admin', adminApiRoutes);
-
+app.use("/api/admin", adminApiRoutes);
 
 // View Routes
 app.use("/", viewRoutes);
 
-
 // Error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).render("error", {
-    title: "Error",
-    message:
-      process.env.NODE_ENV === "production"
-        ? "Something went wrong!"
-        : err.message,
-  });
+	console.error(err.stack);
+	res.status(500).render("error", {
+		title: "Error",
+		message:
+			process.env.NODE_ENV === "production"
+				? "Something went wrong!"
+				: err.message,
+	});
 });
 
 export default app;
